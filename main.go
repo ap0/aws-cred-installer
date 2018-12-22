@@ -1,37 +1,36 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/go-ini/ini"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/go-ini/ini"
 )
 
 func main() {
+	awsCredPath := flag.String("aws-cred-path", path.Join(os.Getenv("HOME"), ".aws", "credentials"), "Absolute path to AWS credentials file")
 
-	if len(os.Args) != 2 {
-		log.Println("must specify an argument")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage: aws-cred-installer [options] account\n\nOptions:\n")
+		flag.PrintDefaults()
+	}
+
+	flag.Parse()
+
+	sectionToUse := flag.Arg(0)
+	if sectionToUse == "" {
+		flag.Usage()
 		os.Exit(1)
 	}
 
-	sectionToUse := os.Args[1]
-
-	awsPath := path.Join(os.Getenv("HOME"), ".aws")
-	if os.Getenv("AWS_CRED_PATH") != "" {
-		awsPath = os.Getenv("AWS_CRED_PATH")
-	}
-	b, err := ioutil.ReadFile(path.Join(awsPath, "credentials"))
+	iniFile, err := ini.Load(*awsCredPath)
 	if err != nil {
-		log.Println("Error reading credential file: %s", err.Error())
+		log.Println("Error parsing INI file: ", err.Error())
 		os.Exit(1)
-	}
-
-	iniFile, err := ini.Load(b)
-	if err != nil {
-		log.Println("Error parsing INI file: %s", err.Error())
 	}
 
 	for _, section := range iniFile.Sections() {

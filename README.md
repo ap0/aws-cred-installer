@@ -1,6 +1,6 @@
 # aws-cred-installer
 
-Parses the `~/aws.credentials` file and writes environment variable exports to the shell.
+Parses the `~/.aws/credentials` file and writes environment variable export statements to the shell.
 
 ## Usage
 
